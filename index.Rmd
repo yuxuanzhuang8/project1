@@ -32,7 +32,7 @@ tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
 library(fivethirtyeight)
 colnames(hate_crimes)
 colnames(police_killings)
-head(hate_crimes)
+head(hate_crimes) 
 head(police_killings)
 ```
 
@@ -162,30 +162,36 @@ summary(hcrimes_pkillings$avg_hatecrimes_per_100k_fbi)
 
 The top five states had the HIGHEST average annual hate crimes per 100,000 population from 2010-2015 were: DC, MA, ND, KY, and WA. The top five states had the LOWEST average annual hate crimes per 100,000 population from 2010-2015 were: WY, GA, PA, IA, and MS. Mean=2.047, Maximum=10.954, Minimum=0.267, and there are 4 NAs. 
 
+```{r}
+hcrimes_pkillings %>% summarize(cor(hate_crimes_per_100k_splc, avg_hatecrimes_per_100k_fbi, use="pair"))
+```
+There is a moderate positive correlation between hate crimes per 100,000 population in 2016 and average annual hate crimes per 100,000 population from 2010-2015.
+
 
 ```{r}
-hcrimes_pkillings %>% group_by(state) %>% summarize(number_of_cases=n()) %>% arrange(-number_of_cases)
-hcrimes_pkillings %>% group_by(state) %>% summarize(number_of_cases=n()) %>% arrange(number_of_cases)
-hcrimes_pkillings %>% group_by(state) %>% summarize(number_of_cases=n()) %>% summarize(mean_cases=mean(number_of_cases))
+hcrimes_pkillings %>% group_by(state) %>% mutate(number_of_cases=n()) %>% arrange(-number_of_cases) %>% select(state, number_of_cases) %>% distinct()
+hcrimes_pkillings %>% group_by(state) %>% mutate(number_of_cases=n()) %>% arrange(number_of_cases) %>% select(state, number_of_cases) %>% distinct()
+hcrimes_pkillings %>% group_by(state) %>% mutate(number_of_cases=n()) -> hcrimes_pkillings1
+summary(hcrimes_pkillings1$number_of_cases)
 ```
 
-The top five states had the GREATEST number of police killing cases in 2015 were CA, TX, FL, AZ, and OK. The top five states had the LOWEST number of police killing cases in 2015 were CT, DC, ME, ND, NH, RI, SD, VT, and WY. The mean value of the cases were 9.24. Maximum=74 and minimum=1.
+The top five states had the GREATEST number of police killing cases in 2015 were CA, TX, FL, AZ, and OK. The top five states had the LOWEST number of police killing cases in 2015 were CT, DC, ME, ND, NH, RI, SD, VT, and WY. The mean number of the cases were 25.52. Maximum=74 and minimum=1.
 
 
 ```{r}
-hcrimes_pkillings %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) %>% select(state,share_nonwhite_state,share_non_white) %>% distinct()
-hcrimes_pkillings %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) -> hcrimes_pkillings1
+hcrimes_pkillings1 %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) %>% select(state,share_nonwhite_state,share_non_white) %>% distinct()
+hcrimes_pkillings1 %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) -> hcrimes_pkillings2
 ```
 
-Variable 'share_non_white' from the "hate_crimes" dataset indicates share of the population that is not white at state level in 2015. Variable 'share_white' from the "police_killings" dataset indicates share of the population that is non-Hispanic white at tract level. The above coding is to convert the 'share_white' variable to the 'share_nonwhite_state' variable that can be compared to the 'share_non_white' variable. Thus, the new dataset is "hcrimes_pkillings1."
+Variable 'share_non_white' from the "hate_crimes" dataset indicates share of the population that is not white at state level in 2015. Variable 'share_white' from the "police_killings" dataset indicates share of the population that is non-Hispanic white at tract level. The above coding is to convert the 'share_white' variable to the 'share_nonwhite_state' variable that can be compared to the 'share_non_white' variable. Thus, the new dataset is "hcrimes_pkillings2."
 
 ```{r}
-hcrimes_pkillings1 %>% group_by(raceethnicity) %>% summarize(n_cases_re=n()) %>% mutate(per_re=n_cases_re/nrow(hcrimes_pkillings1))
+hcrimes_pkillings2 %>% group_by(raceethnicity) %>% summarize(n_cases_re=n()) %>% mutate(per_re=n_cases_re/nrow(hcrimes_pkillings1))
 ```
 In 2015, 50.5% of the people who died from interactions with police were White, 28.9% were Black, and 14.3% were Hispanic/Latino. 
 
 ```{r}
-hcrimes_pkillings1 %>% filter(college>mean(college)) %>% group_by(raceethnicity) %>% summarize(n_cases_re=n()) %>% mutate(per_re=n_cases_re/nrow(hcrimes_pkillings1)) %>% mutate(sum_per_re=sum(per_re))
+hcrimes_pkillings2 %>% filter(college>mean(college)) %>% group_by(raceethnicity) %>% summarize(n_cases_re=n()) %>% mutate(per_re=n_cases_re/nrow(hcrimes_pkillings1)) %>% mutate(sum_per_re=sum(per_re))
 ```
 In 2015, 33.4% of the people who died from interactions with police were living in the tract that has a share of 25+ years old with BA or higher population above the mean of all the tracts that had police killing cases. 
 
@@ -193,22 +199,27 @@ In 2015, 33.4% of the people who died from interactions with police were living 
 #### Visualizing
 
 ```{R}
-# your plot 1
+library(ggplot2)
+hcrimes_pkillings2 %>% ggplot(aes(hate_crimes_per_100k_splc,avg_hatecrimes_per_100k_fbi))+geom_point(aes(color=state,size=number_of_cases))+geom_smooth(method="lm")+xlab("Hate Crimes per 100k Population in 2016")+ylab("Average Annual Hate Crimes per 100k Population from 2010-2015")+ggtitle("Relationship between Police Killing Cases and Hate Crime")+theme_bw()
 ```
-
-Your discussion of plot 1
+Plot 1 illustrates that most of the police killings in 2015 took place in the states which has a rate of hate crimes per 100k population of 0-0.4 and an average annual hate crime cases number per 100k population of 0-4.5.
 
 ```{R}
-# your plot 2
+hcrimes_pkillings2 %>% ggplot(aes(x = state, fill=number_of_cases))+geom_bar()+theme_bw()+xlab("State")+ylab("Number of Police Killing Cases")+ggtitle("Number of Police Killing Cases Vary by States in 2015")
 ```
-
-Your discussion of plot 2
+Plot 2 is a bar graph that illustrates the number of cases of police killings for each state in the United States in 2015. 
 
 ```{R}
-# your plot 3
-```
+ggplot(hcrimes_pkillings2, aes(x = raceethnicity, y = college, fill=gender))+
+    geom_bar(stat="summary", position="dodge")+
+    geom_errorbar(stat="summary",position="dodge")+xlab("Race/Ethnicity")+ylab("Share of 25+ Population with BA or Higher")+ggtitle("Demographic Information on the People Killed by Police in 2015(a)")+ylim(0, 1)+theme_bw() 
 
-Your discussion of plot 3
+ggplot(hcrimes_pkillings2, aes(x = raceethnicity, y = share_pop_hs, fill=gender))+
+    geom_bar(stat="summary", position="dodge")+
+    geom_errorbar(stat="summary",position="dodge")+xlab("Race/Ethnicity")+ylab("Share of 25+ Population with a High-School Degree")+ggtitle("Demographic Information on the People Killed by Police in 2015(b)")+ylim(0, 1)+theme_bw() 
+
+```
+Plot 3 illustrates the average level of education where the person, who was killed by the police, lived. The person was categorized in terms of race/ethnicity and gender. The education level was represented by share of 25+ population with a BA or higher degree and share of 25+ population with a high-school degree. As it is shown in figure(b), more than 80% of the states that had cases of police killing have a 25+ population with a high school degree. 
 
 #### Concluding Remarks
 
