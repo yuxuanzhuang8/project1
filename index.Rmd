@@ -198,7 +198,7 @@ In 2015, 33.4% of the people who died from interactions with police were living 
 
 #### Visualizing
 
-##### Plot1
+##### Plot 1
 ```{R}
 library(ggplot2)
 hcrimes_pkillings2 %>% ggplot(aes(hate_crimes_per_100k_splc,avg_hatecrimes_per_100k_fbi))+geom_point(aes(color=state,size=number_of_cases))+geom_smooth(method="lm")+xlab("Hate Crimes per 100k Population in 2016")+ylab("Average Annual Hate Crimes per 100k Population from 2010-2015")+ggtitle("Relationship between Police Killing Cases and Hate Crime")+theme_bw()+theme(text = element_text(size=9))

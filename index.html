@@ -2068,8 +2068,8 @@ hcrimes_pkillings2 %&gt;% group_by(raceethnicity) %&gt;% summarize(n_cases_re = 
 </div>
 <div id="visualizing" class="section level4">
 <h4>Visualizing</h4>
-<div id="plot1" class="section level5">
-<h5>Plot1</h5>
+<div id="plot-1" class="section level5">
+<h5>Plot 1</h5>
 <pre class="r"><code>library(ggplot2)
 hcrimes_pkillings2 %&gt;% ggplot(aes(hate_crimes_per_100k_splc, 
     avg_hatecrimes_per_100k_fbi)) + geom_point(aes(color = state, 
