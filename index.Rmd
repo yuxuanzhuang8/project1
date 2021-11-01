@@ -1,5 +1,5 @@
 ---
-title: 'Project 1: Wrangling, Exploration, Visualization'
+title: 'Project 1: Potential Connection between Hate Crimes and Police Killing'
 author: "SDS322E"
 date: ''
 output:
@@ -23,43 +23,171 @@ tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
 
 #### Introduction 
 
-Paragraph or two introducing your datasets and variables, why they are interesting to you, etc.
+##### The data used in this project was sourced from two datasets: "hate_crimes" and "police_killings" in the R Package "fivethirtyeight."
+
+##### The definition of hate crime is a prejudice-motivated crime which occurs when a perpetrator attacks a victim because of the victim's (perceived) membership of a certain social group or racial demographic. Hate crimes increased after the 2016 election, according to the Southern Poverty Law Center, there were about 90 hate crimes per day in the first 10 days after the election. By comparison, about 36,000 hate crimes were reported to the FBI from 2010 through 2015 — an average of 16 per day. On the other hand, there were 467 cases of police killing in the year of 2015, which is another notable and debatable social issue. 
+##### As a student of social science, I am interested in the social factors that are responsible or/and have the potential of causing both hate crimes and police killing. Hence, the research questions of this project include (1) whether there is something in common between factors impact the number of hate crimes and police killing, and (2) exploring the relationship between the frequency of killing executed by law enforcement officers and the incidence rate of hate crimes.
 
 ```{R}
-# read your datasets in here, e.g., with read_csv()
-
+library(fivethirtyeight)
+colnames(hate_crimes)
+colnames(police_killings)
+head(hate_crimes)
+head(police_killings)
 ```
+
+##### The dataset "hate_crimes" is the raw data behind the article "Higher Rates of Hate Crimes were Tied to Income Inequality" published in 2017. This is the link of that article: https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/. There are 13 variables with 51 rows representing US states and DC in the dataset. 
+
+There are 2 outcome variables, 'hate_crimes_per_100k_splc' and 'avg_hatecrimes_per_100k_fbi.' 
+
+    'hate_crimes_per_100k_splc' indicates hate crimes per 100,000 population, sourced from Southern Poverty Law Center in Nov. 9-18, 2016. 
+    'avg_hatecrimes_per_100k_fbi' indicates average annual hate crimes per 100,000 population, sourced from FBI from 2010-2015.
+
+There are 11 factor variables that can be separated into 4 categories: (1) location, (2) income level / employment status, (3) education level, and (4) other demographic information. 
+
+    1.1 'state': State name
+    1.2 'state_abbrev': State abbreviation
+    2.1 'median_house_inc': Median household income in 2016
+    2.2 'share_unemp_seas': Share of the population that is unemployed (seasonally adjusted) in Sep 2016
+    2.3 'share_white_poverty': Share of white residents who are living in poverty in 2015
+    2.4 'gini_index': Gini Index in 2015
+    3.1 'share_pop_hs': Share of adults 25 and older with a high-school degree in 2009
+    4.1 'share_pop_metro': Share of the population that lives in metropolitan areas in 2015
+    4.2 'share_non_citizen': Share of the population that are not U.S. citizens in 2015
+    4.3 'share_non_white': Share of the population that is not white in 2015
+    4.4 'share_vote_trump': Share of 2016 U.S. presidential voters who voted for Donald Trump
+
+##### The dataset "police_killings" is the raw data behind the article "Where Police Have Killed Americans In 2015" published in 2015. This is the link of that article: https://fivethirtyeight.com/features/where-police-have-killed-americans-in-2015/. In the dataset, there are 34 variables with 467 rows representing people who died from interactions with plolice in the year of 2015. 
+
+Below are variables of interest (15 out of 34).
+
+    ‘gender’：Gender of deceased
+    ‘raceethnicity’：Race/ethnicity of deceased
+    ‘state’： State where incident occurred
+    'share_white': Share of pop that is non-Hispanic white
+    'share_black': Share of pop that is black (alone, not in combination)
+    'share_hispanic': Share of pop that is Hispanic/Latino (any race)
+    'p_income': Tract-level median personal income
+    'h_income': Tract-level median household income
+    'county_income': County-level median household income
+    'comp_income': 'h_income' / 'county_income'
+    'county_bucket': Household income, quintile within county
+    'nat_bucket': Household income, quintile nationally
+    'pov': Tract-level poverty rate (official)
+    'urate': Tract-level unemployment rate
+    'college': Share of 25+ pop with BA or higher
+    
+
 
 #### Tidying: Reshaping
 
-If your datasets are tidy already, demonstrate that you can reshape data with pivot wider/longer here (e.g., untidy and then retidy). Alternatively, it may be easier to wait until the wrangling section so you can reshape your summary statistics. Note here if you are going to do this.
+Both "hate_crimes" and "police_killings" datasets are already tidy. The data reshaping below are performing the processes of untidying (using pivot_longer) and then retidying (using pivot_wider). 
 
 ```{R}
-# your tidying code (if applicable; can also wait until wrangling section)
+library(tidyr)
+library(dplyr)
+hate_crimes %>% pivot_longer(3:13,names_to="factor",values_to="value") %>% head(12)
+hate_crimes %>% pivot_longer(3:13,names_to="factor",values_to="value") -> untidy_hate_crime_1
+untidy_hate_crime_1 %>% pivot_wider(names_from="factor",values_from="value")
+
+police_killings %>% pivot_longer(26:30,names_to="income",values_to="value") %>% select(c(1,30:31)) %>% head(6)
+police_killings %>% pivot_longer(26:30,names_to="income",values_to="value") -> untidy_police_killings_1
+untidy_police_killings_1 %>% pivot_wider(names_from="income",values_from="value")
 ```
+
 
     
 #### Joining/Merging
 
 ```{R}
-# your joining code
-
-# your joining code
+police_killings %>% inner_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name"))
+police_killings %>% inner_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) ->hcrimes_pkillings
 ```
 
-Discussions of joining here. Feel encouraged to break up into more than once code chunk and discuss each in turn.
+"hate_crimes" and "police_killings" datasets were joined into a single dataset named "hcrimes_pkillings" by the common variable 'state.' The variable 'state' was chosed because it is the only variable that the two datasets have in common. In addition, location is one of the most important information in the description of both hate crimes and police killings. Different from other demographic information such as citizen's economic, education, and race/ethnicity status, location (or the variable 'state') is a fixed character variable without any potential ambiguity that could be caused by numeric variables. 
+
+```{r}
+nrow(hate_crimes)
+ncol(hate_crimes)
+colnames(hate_crimes)
+```
+
+There are 51 observations and 13 variables in the "hate_crimes" dataset since each observation was corresponding to the 51 states of the United States.
+
+```{r}
+nrow(police_killings)
+ncol(police_killings)
+colnames(police_killings)
+```
+
+There are 467 observations and 34 variables in the "police_killings" dataset. Each observation represents one person who died from interactions with police. 
+
+```{r}
+nrow(hcrimes_pkillings)
+ncol(hcrimes_pkillings)
+colnames(hcrimes_pkillings)
+```
+
+After joining the two datasets, the total number of observations are 467 with 46 variables. The 46 variables come from adding variables from two datasets and subtracting one common variable (13+34-1=46). The 467 observations are the overlap of the "hate_crimes" and "police_killings" datasets.
+
+*Note. The datasets were merged by using the function of inner_join(). In this case, if there was no match of the variable 'state' between the two datasets, which means there was/were state(s) that did not have any case of police killing in 2015, then the observation(s) related to hate crimes of that state would be removed. For information of which state's observation were removed, see below.*
+
+```{r}
+police_killings %>% full_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) %>% filter(is.na(.))
+police_killings %>% full_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) %>% nrow()
+police_killings %>% full_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) %>% filter(is.na(.)) %>% nrow()
+```
+According to the information above, there should be 471 observations in total after merging the two datasets using the funtion full_join(). However, since the project's aim is to explore the association between police killings and hate crimes, the observation of the states which did not have police killing cases needs to be removed. As it is shown in the table, state ND, RI, SD, and VT did not have any police killing case in 2015, so there were 4 observations (or rows) dropped from the merged dataset, and therefore there are 467 (=471-4) observations in total in the "hcrimes_pkillings" dataset. One potential problem caused by dropping the data could be the decline in the power of explanatory factor of hate crime incidence. 
+
+
 
 ####  Wrangling
 
+
 ```{R}
-# your wrangling code
+glimpse(hcrimes_pkillings)
 
-# your wrangling code
-
-# your wrangling code
+hcrimes_pkillings %>% group_by(state) %>% arrange(-hate_crimes_per_100k_splc) %>% select(state,hate_crimes_per_100k_splc) %>% distinct()
+hcrimes_pkillings %>% group_by(state) %>% arrange(hate_crimes_per_100k_splc) %>% select(state,hate_crimes_per_100k_splc) %>% distinct()
+summary(hcrimes_pkillings$hate_crimes_per_100k_splc)
 ```
 
-Your discussion of wrangling section here. Feel encouraged to break up into more than once code chunk and discuss each in turn.
+The top five states had the HIGHEST hate crimes per 100,000 population in 2016 were: DC, OR, WA, MA, and MN. The top five states had the LOWEST hate crimes per 100,000 population in 2016 were: MS, AR, NJ, KS, and LA. Mean=0.258, Maximum=1.522, Minimum=0.067, and there are 5 NAs. 
+
+```{r}
+hcrimes_pkillings %>% group_by(state) %>% arrange(-avg_hatecrimes_per_100k_fbi) %>% select(state,avg_hatecrimes_per_100k_fbi) %>% distinct()
+hcrimes_pkillings %>% group_by(state) %>% arrange(avg_hatecrimes_per_100k_fbi) %>% select(state,avg_hatecrimes_per_100k_fbi) %>% distinct()
+summary(hcrimes_pkillings$avg_hatecrimes_per_100k_fbi)
+```
+
+The top five states had the HIGHEST average annual hate crimes per 100,000 population from 2010-2015 were: DC, MA, ND, KY, and WA. The top five states had the LOWEST average annual hate crimes per 100,000 population from 2010-2015 were: WY, GA, PA, IA, and MS. Mean=2.047, Maximum=10.954, Minimum=0.267, and there are 4 NAs. 
+
+
+```{r}
+hcrimes_pkillings %>% group_by(state) %>% summarize(number_of_cases=n()) %>% arrange(-number_of_cases)
+hcrimes_pkillings %>% group_by(state) %>% summarize(number_of_cases=n()) %>% arrange(number_of_cases)
+hcrimes_pkillings %>% group_by(state) %>% summarize(number_of_cases=n()) %>% summarize(mean_cases=mean(number_of_cases))
+```
+
+The top five states had the GREATEST number of police killing cases in 2015 were CA, TX, FL, AZ, and OK. The top five states had the LOWEST number of police killing cases in 2015 were CT, DC, ME, ND, NH, RI, SD, VT, and WY. The mean value of the cases were 9.24. Maximum=74 and minimum=1.
+
+
+```{r}
+hcrimes_pkillings %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) %>% select(state,share_nonwhite_state,share_non_white) %>% distinct()
+hcrimes_pkillings %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) -> hcrimes_pkillings1
+```
+
+Variable 'share_non_white' from the "hate_crimes" dataset indicates share of the population that is not white at state level in 2015. Variable 'share_white' from the "police_killings" dataset indicates share of the population that is non-Hispanic white at tract level. The above coding is to convert the 'share_white' variable to the 'share_nonwhite_state' variable that can be compared to the 'share_non_white' variable. Thus, the new dataset is "hcrimes_pkillings1."
+
+```{r}
+hcrimes_pkillings1 %>% group_by(raceethnicity) %>% summarize(n_cases_re=n()) %>% mutate(per_re=n_cases_re/nrow(hcrimes_pkillings1))
+```
+In 2015, 50.5% of the people who died from interactions with police were White, 28.9% were Black, and 14.3% were Hispanic/Latino. 
+
+```{r}
+hcrimes_pkillings1 %>% filter(college>mean(college)) %>% group_by(raceethnicity) %>% summarize(n_cases_re=n()) %>% mutate(per_re=n_cases_re/nrow(hcrimes_pkillings1)) %>% mutate(sum_per_re=sum(per_re))
+```
+In 2015, 33.4% of the people who died from interactions with police were living in the tract that has a share of 25+ years old with BA or higher population above the mean of all the tracts that had police killing cases. 
 
 
 #### Visualizing
