@@ -1,5 +1,5 @@
 ---
-title: 'Project 1: Potential Connection between Hate Crimes and Police Killing'
+title: 'Project 1: Impact of Race/Ethnicity and State Education Level on Hate Crimes and Police Killing'
 author: "SDS322E"
 date: ''
 output:
@@ -26,7 +26,7 @@ tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
 ##### The data used in this project was sourced from two datasets: "hate_crimes" and "police_killings" in the R Package "fivethirtyeight."
 
 ##### The definition of hate crime is a prejudice-motivated crime which occurs when a perpetrator attacks a victim because of the victim's (perceived) membership of a certain social group or racial demographic. Hate crimes increased after the 2016 election, according to the Southern Poverty Law Center, there were about 90 hate crimes per day in the first 10 days after the election. By comparison, about 36,000 hate crimes were reported to the FBI from 2010 through 2015 — an average of 16 per day. On the other hand, there were 467 cases of police killing in the year of 2015, which is another notable and debatable social issue. 
-##### As a student of social science, I am interested in the social factors that are responsible or/and have the potential of causing both hate crimes and police killing. Hence, the research questions of this project include (1) whether there is something in common between factors impact the number of hate crimes and police killing, and (2) exploring the relationship between the frequency of killing executed by law enforcement officers and the incidence rate of hate crimes.
+##### As a student of social science, I am interested in the social factors that are responsible or/and have the potential of causing both hate crimes and police killing. To be specific, this project will focus on what roles race/ethnicity and education level in the neigborhood play in the police killing incidence, and whether there is an association between hate crimes and police killing.
 
 ```{R}
 library(fivethirtyeight)
@@ -180,12 +180,12 @@ The top five states had the GREATEST number of police killing cases in 2015 were
 
 ```{r}
 hcrimes_pkillings1 %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) %>% select(state,share_nonwhite_state,share_non_white) %>% distinct()
-hcrimes_pkillings1 %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) -> hcrimes_pkillings2
 ```
 
 Variable 'share_non_white' from the "hate_crimes" dataset indicates share of the population that is not white at state level in 2015. Variable 'share_white' from the "police_killings" dataset indicates share of the population that is non-Hispanic white at tract level. The above coding is to convert the 'share_white' variable to the 'share_nonwhite_state' variable that can be compared to the 'share_non_white' variable. Thus, the new dataset is "hcrimes_pkillings2."
 
 ```{r}
+hcrimes_pkillings1 %>% mutate(share_nonwhite_tract=100-share_white) %>% group_by(state) %>% mutate(share_nonwhite_state=mean(share_nonwhite_tract)) -> hcrimes_pkillings2
 hcrimes_pkillings2 %>% group_by(raceethnicity) %>% summarize(n_cases_re=n()) %>% mutate(per_re=n_cases_re/nrow(hcrimes_pkillings1))
 ```
 In 2015, 50.5% of the people who died from interactions with police were White, 28.9% were Black, and 14.3% were Hispanic/Latino. 
@@ -198,33 +198,40 @@ In 2015, 33.4% of the people who died from interactions with police were living 
 
 #### Visualizing
 
+##### Plot1
 ```{R}
 library(ggplot2)
-hcrimes_pkillings2 %>% ggplot(aes(hate_crimes_per_100k_splc,avg_hatecrimes_per_100k_fbi))+geom_point(aes(color=state,size=number_of_cases))+geom_smooth(method="lm")+xlab("Hate Crimes per 100k Population in 2016")+ylab("Average Annual Hate Crimes per 100k Population from 2010-2015")+ggtitle("Relationship between Police Killing Cases and Hate Crime")+theme_bw()
+hcrimes_pkillings2 %>% ggplot(aes(hate_crimes_per_100k_splc,avg_hatecrimes_per_100k_fbi))+geom_point(aes(color=state,size=number_of_cases))+geom_smooth(method="lm")+xlab("Hate Crimes per 100k Population in 2016")+ylab("Average Annual Hate Crimes per 100k Population from 2010-2015")+ggtitle("Relationship between Police Killing Cases and Hate Crime")+theme_bw()+theme(text = element_text(size=9))
 ```
-Plot 1 illustrates that most of the police killings in 2015 took place in the states which has a rate of hate crimes per 100k population of 0-0.4 and an average annual hate crime cases number per 100k population of 0-4.5.
+Plot 1 illustrates that most of the police killings in 2015 took place in the states which has a rate of hate crimes per 100k population of 0-0.4 and an average annual hate crime cases number per 100k population of 0-4.5 from 2010-2015.
 
+##### Plot 2
+```{r}
+hcrimes_pkillings2 %>% ggplot(aes(avg_hatecrimes_per_100k_fbi,number_of_cases))+geom_point(aes(color=state))+geom_smooth(method="lm")+xlab("Average Annual Hate Crimes per 100k Population from 2010-2015")+ylab("Number of Police Killing Cases in 2015")+ggtitle("Relationship between Police Killing Cases and Hate Crime")+theme_bw()
+```
+Plot 2 illustrates that there was an overall negative correlation between the average annual number of hate crime from 2010-2015 and the number of police killing cases in 2015.
+
+##### Plot 3
 ```{R}
-hcrimes_pkillings2 %>% ggplot(aes(x = state, fill=number_of_cases))+geom_bar()+theme_bw()+xlab("State")+ylab("Number of Police Killing Cases")+ggtitle("Number of Police Killing Cases Vary by States in 2015")
+hcrimes_pkillings2 %>% ggplot(aes(x = state, fill=number_of_cases))+geom_bar()+theme_bw()+xlab("State")+ylab("Number of Police Killing Cases")+ggtitle("Number of Police Killing Cases Vary by States in 2015")+theme(text = element_text(size=6))
 ```
-Plot 2 is a bar graph that illustrates the number of cases of police killings for each state in the United States in 2015. 
+Plot 3 is a bar graph that illustrates the number of cases of police killings for each state in the United States in 2015. 
 
+##### Plot 4a and 4b
 ```{R}
 ggplot(hcrimes_pkillings2, aes(x = raceethnicity, y = college, fill=gender))+
     geom_bar(stat="summary", position="dodge")+
-    geom_errorbar(stat="summary",position="dodge")+xlab("Race/Ethnicity")+ylab("Share of 25+ Population with BA or Higher")+ggtitle("Demographic Information on the People Killed by Police in 2015(a)")+ylim(0, 1)+theme_bw() 
+    geom_errorbar(stat="summary",position="dodge")+xlab("Race/Ethnicity")+ylab("Share of 25+ Population with BA or Higher")+ggtitle("Demographic Information on the People Killed by Police in 2015(a)")+ylim(0, 1)+theme_bw()+theme(text = element_text(size=9))
 
 ggplot(hcrimes_pkillings2, aes(x = raceethnicity, y = share_pop_hs, fill=gender))+
     geom_bar(stat="summary", position="dodge")+
-    geom_errorbar(stat="summary",position="dodge")+xlab("Race/Ethnicity")+ylab("Share of 25+ Population with a High-School Degree")+ggtitle("Demographic Information on the People Killed by Police in 2015(b)")+ylim(0, 1)+theme_bw() 
+    geom_errorbar(stat="summary",position="dodge")+xlab("Race/Ethnicity")+ylab("Share of 25+ Population with a High-School Degree")+ggtitle("Demographic Information on the People Killed by Police in 2015(b)")+ylim(0, 1)+theme_bw()+theme(text = element_text(size=9))
 
 ```
-Plot 3 illustrates the average level of education where the person, who was killed by the police, lived. The person was categorized in terms of race/ethnicity and gender. The education level was represented by share of 25+ population with a BA or higher degree and share of 25+ population with a high-school degree. As it is shown in figure(b), more than 80% of the states that had cases of police killing have a 25+ population with a high school degree. 
+Plot 4 illustrates the average level of education where the person, who was killed by the police, lived. The person was categorized in terms of race/ethnicity and gender. The education level was represented by share of 25+ population with a BA or higher degree and share of 25+ population with a high-school degree. As it is shown in figure(b), more than 80% of the states that had cases of police killing have a 25+ population with a high school degree. 
 
 #### Concluding Remarks
 
-If any!
-
-
+There is a negative correlation between the number of hate crimes and the number of police killing cases. People who were killed by the police lived in a state that over 80% of the 25+ population have a high school degree or above. 
 
 
