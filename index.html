@@ -1815,24 +1815,19 @@ untidy_police_killings_1 %&gt;% pivot_wider(names_from = &quot;income&quot;,
 <p>After joining the two datasets, the total number of observations are 467 with 46 variables. The 46 variables come from adding variables from two datasets and subtracting one common variable (13+34-1=46). The 467 observations are the overlap of the “hate_crimes” and “police_killings” datasets.</p>
 <p><em>Note. The datasets were merged by using the function of inner_join(). In this case, if there was no match of the variable ‘state’ between the two datasets, which means there was/were state(s) that did not have any case of police killing in 2015, then the observation(s) related to hate crimes of that state would be removed. For information of which state’s observation were removed, see below.</em></p>
 <pre class="r"><code>police_killings %&gt;% full_join(hate_crimes, by = c(state = &quot;state_abbrev&quot;), 
-    suffix = c(&quot;.abbrev&quot;, &quot;.full_name&quot;)) %&gt;% filter(is.na(.))</code></pre>
-<pre><code>## # A tibble: 7 × 46
-##   name    age gender raceethnicity month     day  year streetaddress city  state
-##   &lt;chr&gt; &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;         &lt;chr&gt;   &lt;int&gt; &lt;int&gt; &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;
-## 1 &lt;NA&gt;     NA Male   &lt;NA&gt;          January    16  2015 Co Rd 2718    Maba… TX   
-## 2 &lt;NA&gt;     NA Female &lt;NA&gt;          May        25  2015 6505 Shirley… Aust… TX   
-## 3 &lt;NA&gt;     NA Male   White         June        1  2015 271 Greece R… Roch… NY   
-## 4 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;       NA    NA &lt;NA&gt;          &lt;NA&gt;  ND   
-## 5 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;       NA    NA &lt;NA&gt;          &lt;NA&gt;  RI   
-## 6 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;       NA    NA &lt;NA&gt;          &lt;NA&gt;  SD   
-## 7 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;       NA    NA &lt;NA&gt;          &lt;NA&gt;  VT   
-## # … with 36 more variables: latitude &lt;dbl&gt;, longitude &lt;dbl&gt;, state_fp &lt;int&gt;,
-## #   county_fp &lt;int&gt;, tract_ce &lt;int&gt;, geo_id &lt;dbl&gt;, county_id &lt;int&gt;,
-## #   namelsad &lt;chr&gt;, lawenforcementagency &lt;chr&gt;, cause &lt;chr&gt;, armed &lt;chr&gt;,
-## #   pop &lt;int&gt;, share_white &lt;dbl&gt;, share_black &lt;dbl&gt;, share_hispanic &lt;dbl&gt;,
-## #   p_income &lt;int&gt;, h_income &lt;int&gt;, county_income &lt;int&gt;, comp_income &lt;dbl&gt;,
-## #   county_bucket &lt;int&gt;, nat_bucket &lt;int&gt;, pov &lt;dbl&gt;, urate &lt;dbl&gt;,
-## #   college &lt;dbl&gt;, state.full_name &lt;chr&gt;, median_house_inc &lt;int&gt;, …</code></pre>
+    suffix = c(&quot;.abbrev&quot;, &quot;.full_name&quot;)) %&gt;% filter(is.na(.)) %&gt;% 
+    select(name, age, gender, raceethnicity, month, day, year, 
+        city, state, state.full_name)</code></pre>
+<pre><code>## # A tibble: 7 × 10
+##   name    age gender raceethnicity month   day  year city  state state.full_name
+##   &lt;chr&gt; &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;         &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;          
+## 1 &lt;NA&gt;     NA Male   &lt;NA&gt;          Janu…    16  2015 Maba… TX    Texas          
+## 2 &lt;NA&gt;     NA Female &lt;NA&gt;          May      25  2015 Aust… TX    Texas          
+## 3 &lt;NA&gt;     NA Male   White         June      1  2015 Roch… NY    New York       
+## 4 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;     NA    NA &lt;NA&gt;  ND    North Dakota   
+## 5 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;     NA    NA &lt;NA&gt;  RI    Rhode Island   
+## 6 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;     NA    NA &lt;NA&gt;  SD    South Dakota   
+## 7 &lt;NA&gt;     NA &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;     NA    NA &lt;NA&gt;  VT    Vermont</code></pre>
 <pre class="r"><code>police_killings %&gt;% full_join(hate_crimes, by = c(state = &quot;state_abbrev&quot;), 
     suffix = c(&quot;.abbrev&quot;, &quot;.full_name&quot;)) %&gt;% nrow()</code></pre>
 <pre><code>## [1] 471</code></pre>
