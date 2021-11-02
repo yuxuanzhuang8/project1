@@ -26,7 +26,7 @@ tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
 ##### The data used in this project was sourced from two datasets: "hate_crimes" and "police_killings" in the R Package "fivethirtyeight."
 
 ##### The definition of hate crime is a prejudice-motivated crime which occurs when a perpetrator attacks a victim because of the victim's (perceived) membership of a certain social group or racial demographic. Hate crimes increased after the 2016 election, according to the Southern Poverty Law Center, there were about 90 hate crimes per day in the first 10 days after the election. By comparison, about 36,000 hate crimes were reported to the FBI from 2010 through 2015 — an average of 16 per day. On the other hand, there were 467 cases of police killing in the year of 2015, which is another notable and debatable social issue. 
-##### As a student of social science, I am interested in the social factors that are responsible or/and have the potential of causing both hate crimes and police killing. To be specific, this project will focus on what roles race/ethnicity and education level in the neigborhood play in the police killing incidence, and whether there is an association between hate crimes and police killing.
+##### As a student of social science, I am interested in the social factors that are responsible or/and have the potential of causing both hate crimes and police killing. To be specific, this project will focus on what roles race/ethnicity and state education level play in the police killing incidence, and whether there is an association between hate crimes and police killing.
 
 ```{R}
 library(fivethirtyeight)
@@ -133,7 +133,7 @@ After joining the two datasets, the total number of observations are 467 with 46
 *Note. The datasets were merged by using the function of inner_join(). In this case, if there was no match of the variable 'state' between the two datasets, which means there was/were state(s) that did not have any case of police killing in 2015, then the observation(s) related to hate crimes of that state would be removed. For information of which state's observation were removed, see below.*
 
 ```{r}
-police_killings %>% full_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) %>% filter(is.na(.))
+police_killings %>% full_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) %>% filter(is.na(.)) %>% select(name,age,gender,raceethnicity,month,day,year,city,state,state.full_name)
 police_killings %>% full_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) %>% nrow()
 police_killings %>% full_join(hate_crimes,by=c("state"="state_abbrev"), suffix=c(".abbrev",".full_name")) %>% filter(is.na(.)) %>% nrow()
 ```
